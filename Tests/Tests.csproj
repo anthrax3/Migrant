@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6109E322-4AC0-496C-89A2-012232A047E3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Antmicro.Migrant.Tests</RootNamespace>
@@ -46,8 +44,10 @@
     <Compile Include="VersionToleranceTests.cs" />
     <Compile Include="BaseTestWithSettings.cs" />
     <Compile Include="BuiltinSurrogatesTests.cs" />
-    <Compile Include="TwoDomainsTests.cs" />
-    <Compile Include="AddHocCompiler.cs" />
+    <Compile Include="DynamicClass.cs" />
+    <Compile Include="TypeStampTests.cs" />
+    <Compile Include="TwoDomainsDriver.cs" />
+    <Compile Include="TwoDomainTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -50,40 +50,70 @@ namespace Antmicro.Migrant.VersionTolerance
 			{
 				return;
 			}
-            var moduleGuid = reader.ReadGuid(); // module GUID
-            var classNo = reader.ReadInt32(); // # of classes
-			if(moduleGuid == type.Module.ModuleVersionId)
-			{
-				// short path, nothing to check
-                for(var i = 0; i < classNo; i++)
-				{
-                    reader.ReadString(); // class type (AQN)
-                    var fieldNo = reader.ReadInt32(); // # of fields in the class
 
-                    for(var j = 0; j < fieldNo; j++)
-                    {
-                        reader.ReadString(); // field name
-                        reader.ReadString(); // field type (AQN)
-                    }
-				}
+			var streamTypeStamp = new TypeStamp();
+			streamTypeStamp.ReadFrom(reader);
+
+			if(streamTypeStamp.ModuleGUID == type.Module.ModuleVersionId)
+			{
 				stampCache.Add(type, StampHelpers.GetFieldsInSerializationOrder(type, true).Select(x => new FieldInfoOrEntryToOmit(x)).ToList());
 				return;
 			}
 			if(versionToleranceLevel == VersionToleranceLevel.Guid)
 			{
 				throw new InvalidOperationException(string.Format("The class was serialized with different module version id {0}, current one is {1}.",
-				                                                  moduleGuid, type.Module.ModuleVersionId));
+														streamTypeStamp.ModuleGUID, type.Module.ModuleVersionId));
 			}
 
             var result = new List<FieldInfoOrEntryToOmit>();
-            var currentClasses = StampHelpers.GetFieldsStructureInSerializationOrder(type, true).ToList();
+			var assemblyTypeStamp = new TypeStamp(type, true);
+			if (assemblyTypeStamp.Classes.Count != streamTypeStamp.Classes.Count && !versionToleranceLevel.HasFlag(VersionToleranceLevel.InheritanceChainChange))
+			{
+				throw new InvalidOperationException(string.Format("Class hierarchy changed. Expected {0} classes in a chain, but found {1}.", assemblyTypeStamp.Classes.Count, streamTypeStamp.Classes.Count));
+			}
+
+			var cmpResult = assemblyTypeStamp.CompareWith(streamTypeStamp);
+
+			if (cmpResult.ClassesRenamed.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.TypeNameChanged))
+			{
+				throw new InvalidOperationException(string.Format("Class name changed from {0} to {1}", cmpResult.ClassesRenamed[0].Item1, cmpResult.ClassesRenamed[0].Item2));
+			}
+			if (cmpResult.FieldsAdded.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldAddition))
+			{
+				throw new InvalidOperationException(string.Format("Field added: {0}.", cmpResult.FieldsAdded[0].Name));
+			}
+			if (cmpResult.FieldsRemoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldRemoval))
+			{
+				throw new InvalidOperationException(string.Format("Field removed: {0}.", cmpResult.FieldsRemoved[0].Name));
+			}
+			if (cmpResult.FieldsMoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldMove))
+			{
+				throw new InvalidOperationException(string.Format("Field moved: {0}.", cmpResult.FieldsMoved[0].Name));
+			}
+
+			foreach (var field in streamTypeStamp.GetFieldsInAlphabeticalOrder()) 
+			{
+				if (cmpResult.FieldsRemoved.Contains(field))
+				{
+					var ttt = Type.GetType(field.TypeAQN);
+					result.Add(new FieldInfoOrEntryToOmit(ttt));
+				}
+				else
+				{
+					var ttt = Type.GetType(field.OwningTypeAQN);
+					var finfo = ttt.GetField(field.Name);
+					result.Add(new FieldInfoOrEntryToOmit(finfo));
+				}
+			}
+
+			/*
             for(var i = 0; i < classNo; i++)
             {
                 var expectedClass = currentClasses[i];
                 var className = reader.ReadString(); // class name (AQN)
                 var fieldNo = reader.ReadInt32(); // # of field in the class
 
-                if(className != expectedClass.Item1.AssemblyQualifiedName)
+				if(className != expectedClass.Item1.AssemblyQualifiedName && !versionToleranceLevel.HasFlag(VersionToleranceLevel.InheritanceChainChange) && !versionToleranceLevel.HasFlag(VersionToleranceLevel.TypeNameChanged))
                 {
                     throw new InvalidOperationException(string.Format("Class hierarchy changed. Expected {0}, but found {1}.", expectedClass.Item1.AssemblyQualifiedName, className));
                 }
@@ -101,7 +131,7 @@ namespace Antmicro.Migrant.VersionTolerance
                         // we have to read the data to properly move stream,
                         // but that's all - unless this is illegal from the
                         // version tolerance level point of view
-                        if(versionToleranceLevel != VersionToleranceLevel.FieldRemoval && versionToleranceLevel != VersionToleranceLevel.FieldAdditionAndRemoval)
+                        if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldRemoval))
                         {
                             throw new InvalidOperationException(string.Format("Field {0} of type {1} was present in the old version of the class but is missing now. This is" +
                                                                               "incompatible with selected version tolerance level which is {2}.", fieldName, fieldType,
@@ -125,14 +155,14 @@ namespace Antmicro.Migrant.VersionTolerance
                 // result should also contain transient fields, because some of them may
                 // be marked with the [Constructor] attribute
                 var transientFields = currentFields.Select(x => x.Value).Where(x => !Helpers.IsNotTransient(x)).Select(x => new FieldInfoOrEntryToOmit(x)).ToArray();
-                if(currentFields.Count - transientFields.Length > 0 && versionToleranceLevel != VersionToleranceLevel.FieldAddition && 
-                   versionToleranceLevel != VersionToleranceLevel.FieldAdditionAndRemoval)
+                if(currentFields.Count - transientFields.Length > 0 && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldAddition))
                 {
                     throw new InvalidOperationException(string.Format("Current version of the class {0} contains more fields than it had when it was serialized. With given" +
                                                                       "version tolerance level {1} the serializer cannot proceed.", type, versionToleranceLevel));
                 }
                 result.AddRange(transientFields);
             }
+            */
 
 			stampCache.Add(type, result);
 		}

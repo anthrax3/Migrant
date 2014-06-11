@@ -375,7 +375,7 @@ namespace Antmicro.Migrant
 		private const int BufferSize = 4 * 1024;
 
 #if DEBUG
-		internal static readonly bool DontUseIntegerCompression = false;
+		internal static readonly bool DontUseIntegerCompression = true;
 #endif
 	}
 }
