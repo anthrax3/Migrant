@@ -214,14 +214,11 @@ namespace Antmicro.Migrant
 
 		private void UpdateFields(Type actualType, object target)
 		{
-			Console.WriteLine("AT: " + actualType);
 			var fieldOrTypeInfos = stamper.GetFieldsToDeserialize(actualType);
 			foreach(var fieldOrTypeInfo in fieldOrTypeInfos)
 			{
-				Console.WriteLine("F? " + fieldOrTypeInfo);
 				if(fieldOrTypeInfo.Field == null)
 				{
-					Console.WriteLine("Skipping");
 					ReadField(fieldOrTypeInfo.TypeToOmit);
 					continue;
 				}
@@ -300,7 +297,6 @@ namespace Antmicro.Migrant
 
 		private object ReadField(Type formalType)
 		{
-			Console.WriteLine("Reading field: " + formalType);
 			if(Helpers.CheckTransientNoCache(formalType))
 			{
 				return Helpers.GetDefaultValue(formalType);

@@ -98,7 +98,7 @@ namespace Antmicro.Migrant
 				}
 
 				if (matchedIndex == Classes.IndexOf(cl)) {
-					var compareResult = cl.CompareWith (previous.Classes [matchedIndex]);
+					var compareResult = cl.CompareWith(previous.Classes [matchedIndex]);
 					result.FieldsAdded.AddRange(compareResult.FieldsAdded);
 					result.FieldsRemoved.AddRange(compareResult.FieldsRemoved);
 					result.FieldsChanged.AddRange(compareResult.FieldsChanged);
