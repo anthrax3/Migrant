@@ -42,7 +42,6 @@ namespace Antmicro.Migrant
 			Name = finfo.Name;
 			TypeAQN = finfo.FieldType.AssemblyQualifiedName;
 			IsTransient = finfo.GetCustomAttributes(false).Any(a => a is TransientAttribute);
-			Info = finfo; // TODO: remove it
 		}
 
 		public void WriteTo(PrimitiveWriter writer)
@@ -96,7 +95,6 @@ namespace Antmicro.Migrant
 
 		public bool IsTransient { get; private set; }
 		public string Name { get; private set; }
-		public FieldInfo Info { get; private set; }
 		public string TypeAQN { get; private set; }
 		public string OwningTypeAQN { get; set; }
 
