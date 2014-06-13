@@ -66,24 +66,43 @@ namespace Antmicro.Migrant.Tests
 
         public byte[] SerializeOnAppDomain()
         {
-            var t = obj.GetType();
-            Console.WriteLine("Type is " + t);
-            foreach(var f in t.GetFields())
-            {
-                Console.WriteLine("Field: {0} = {1}", f.Name, f.GetValue(obj));
-            }
-
-
             var stream = new MemoryStream();
             var serializer = new Serializer();
             serializer.Serialize(obj, stream);
             return stream.ToArray();
         }
 
+        private Type FindClass(string className)
+        {
+            var currentClass = obj.GetType();
+            while(currentClass != null && currentClass.Name != className)
+            {
+                currentClass = currentClass.BaseType;
+            }
+            if(currentClass == null)
+            {
+                throw new ArgumentException(className);
+            }
+
+            return currentClass;
+        }
+
+        public void SetValueOnAppDomain(string className, string fieldName, object value)
+        {
+            var field = FindClass(className).GetField(fieldName);
+            field.SetValue(obj, value);
+        }
+
         public void SetValueOnAppDomain(string fieldName, object value)
         {
             var field = obj.GetType().GetField(fieldName);
             field.SetValue(obj, value);
+        }
+
+        public object GetValueOnAppDomain(string className, string fieldName)
+        {
+            var field = FindClass(className).GetField(fieldName);
+            return field.GetValue(obj);
         }
 
         public object GetValueOnAppDomain(string fieldName)
@@ -97,13 +116,6 @@ namespace Antmicro.Migrant.Tests
             var stream = new MemoryStream(data);
             var deserializer = new Serializer(settings);
             obj = deserializer.Deserialize<object>(stream);
-
-            var t = obj.GetType();
-            Console.WriteLine("Type is " + t);
-            foreach(var f in t.GetFields())
-            {
-                Console.WriteLine("Field: {0} = {1}", f.Name, f.GetValue(obj));
-            }
         }
 
         public bool SerializeAndDeserializeOnTwoAppDomains(DynamicClass domainOneType, DynamicClass domainTwoType, VersionToleranceLevel vtl)
@@ -118,10 +130,6 @@ namespace Antmicro.Migrant.Tests
                 return true;
             } 
             catch (InvalidOperationException)
-            {
-                return false;
-            }
-            catch (Exception e)
             {
                 return false;
             }

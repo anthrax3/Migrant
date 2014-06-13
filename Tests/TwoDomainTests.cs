@@ -29,6 +29,10 @@ using System.IO;
 namespace Antmicro.Migrant.Tests
 {
     [TestFixture]
+    [TestFixture(false, false)]
+    [TestFixture(true, false)]
+    [TestFixture(false, true)]
+    [TestFixture(true, true)]
     public class TwoDomainTests : TwoDomainsDriver
     {
         public TwoDomainTests(bool useGeneratedSerialized, bool useGeneratedDeserialzer) : base(useGeneratedSerialized, useGeneratedDeserialzer)
@@ -127,6 +131,44 @@ namespace Antmicro.Migrant.Tests
 
             Assert.AreEqual("testing", testsOnDomain2.GetValueOnAppDomain("a"));
             Assert.AreEqual("finish", testsOnDomain2.GetValueOnAppDomain("b"));
+        }
+
+        [Test]
+        public void ShouldHandleNewFieldMoveDown()
+        {
+            var type1 = DynamicClass.Create("C", DynamicClass.Create("B", DynamicClass.Create("A")).WithField<int>("f")).WithField<int>("f");
+            var type2 = DynamicClass.Create("C", DynamicClass.Create("B", DynamicClass.Create("A").WithField<int>("f")).WithField<int>("f"));
+                        
+            testsOnDomain1.CreateInstanceOnAppDomain(type1);
+            testsOnDomain1.SetValueOnAppDomain("B", "f", 200);
+            testsOnDomain1.SetValueOnAppDomain("C", "f", 300);
+
+            var bytes = testsOnDomain1.SerializeOnAppDomain();
+
+            testsOnDomain2.CreateInstanceOnAppDomain(type2);
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+
+            Assert.AreEqual(300, testsOnDomain2.GetValueOnAppDomain("A", "f"));
+            Assert.AreEqual(200, testsOnDomain2.GetValueOnAppDomain("B", "f"));
+        }
+
+        [Test]
+        public void ShouldHandleNewFieldMoveUp()
+        {
+            var type1 = DynamicClass.Create("C", DynamicClass.Create("B", DynamicClass.Create("A").WithField<int>("f")).WithField<int>("f"));
+            var type2 = DynamicClass.Create("C", DynamicClass.Create("B", DynamicClass.Create("A")).WithField<int>("f")).WithField<int>("f");
+                        
+            testsOnDomain1.CreateInstanceOnAppDomain(type1);
+            testsOnDomain1.SetValueOnAppDomain("A", "f", 100);
+            testsOnDomain1.SetValueOnAppDomain("B", "f", 200);
+
+            var bytes = testsOnDomain1.SerializeOnAppDomain();
+
+            testsOnDomain2.CreateInstanceOnAppDomain(type2);
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+
+            Assert.AreEqual(100, testsOnDomain2.GetValueOnAppDomain("C", "f"));
+            Assert.AreEqual(200, testsOnDomain2.GetValueOnAppDomain("B", "f"));
         }
     }
 }
