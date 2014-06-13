@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using Antmicro.Migrant.VersionTolerance;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Antmicro.Migrant
 {
@@ -142,7 +143,7 @@ namespace Antmicro.Migrant
         {
             public List<FieldDescriptor> FieldsAdded   { get; private set; }
             public List<FieldDescriptor> FieldsRemoved { get; private set; }
-			public List<FieldDescriptor> FieldsMoved { get; private set; }
+			public Dictionary<FieldDescriptor, FieldDescriptor> FieldsMoved { get; private set; }
 			public List<FieldDescriptor> FieldsChanged { get; private set; }
 
             public List<Tuple<string, string>> ClassesRenamed { get; private set; }
@@ -161,7 +162,7 @@ namespace Antmicro.Migrant
 			{
 				FieldsAdded = new List<FieldDescriptor>();
 				FieldsRemoved = new List<FieldDescriptor>();
-				FieldsMoved = new List<FieldDescriptor>();
+				FieldsMoved = new Dictionary<FieldDescriptor, FieldDescriptor>();
 				FieldsChanged = new List<FieldDescriptor>();
 
 				ClassesRenamed = new List<Tuple<string, string>>();
@@ -171,12 +172,19 @@ namespace Antmicro.Migrant
 
 			public void CheckFieldMove()
 			{
-				var moved = FieldsAdded.Intersect(FieldsRemoved).ToList();
-				FieldsAdded.RemoveAll(x => moved.Contains(x));
-				FieldsRemoved.RemoveAll(x => moved.Contains(x));
-				FieldsMoved.AddRange(moved);
+				var comparer = new FieldDescriptor.MoveFieldComparer();
+				var moved = FieldsAdded.Intersect(FieldsRemoved, comparer).ToList();
+				foreach (var m in moved)
+				{
+					var fAdded = FieldsAdded.Single(x => comparer.Equals(x, m));
+					var fRemoved = FieldsRemoved.Single(x => comparer.Equals(x, m));
+					FieldsMoved.Add(fRemoved, fAdded);
+					FieldsAdded.Remove(fAdded);
+					FieldsRemoved.Remove(fRemoved);
+				}
 			}
 
+			[Conditional("DEBUG")]
 			public void PrintSummary()
 			{
 				Console.WriteLine("Fields added:");
@@ -192,7 +200,7 @@ namespace Antmicro.Migrant
 				Console.WriteLine("Fields moved:");
 				foreach (var f in FieldsMoved)
 				{
-					Console.WriteLine("\t" + f.Name);
+					Console.WriteLine("\t" + f.Key.Name + " " + f.Key.OwningTypeAQN + " => " + f.Value.OwningTypeAQN);
 				}
 				Console.WriteLine("Fields changed:");
 				foreach (var f in FieldsChanged)

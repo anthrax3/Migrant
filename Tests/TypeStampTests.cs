@@ -24,6 +24,7 @@
 // *******************************************************************
 using System;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Antmicro.Migrant.Tests
 {
@@ -175,7 +176,7 @@ namespace Antmicro.Migrant.Tests
             Assert.IsEmpty(compareResult.FieldsChanged);
 
             Assert.AreEqual(1, compareResult.FieldsMoved.Count);
-            Assert.AreEqual("a", compareResult.FieldsMoved[0].Name);
+            Assert.AreEqual("a", compareResult.FieldsMoved.ElementAt(0).Key.Name);
         }
 
         [Test]
@@ -197,7 +198,7 @@ namespace Antmicro.Migrant.Tests
             Assert.IsEmpty(compareResult.FieldsChanged);
 
             Assert.AreEqual(1, compareResult.FieldsMoved.Count);
-            Assert.AreEqual("a", compareResult.FieldsMoved[0].Name);
+            Assert.AreEqual("a", compareResult.FieldsMoved.ElementAt(0).Key.Name);
         }
 
         [Test]

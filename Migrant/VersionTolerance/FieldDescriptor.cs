@@ -38,6 +38,7 @@ namespace Antmicro.Migrant
 
 		public FieldDescriptor (FieldInfo finfo)
 		{
+			OwningTypeAQN = finfo.DeclaringType.AssemblyQualifiedName;
 			Name = finfo.Name;
 			TypeAQN = finfo.FieldType.AssemblyQualifiedName;
 			IsTransient = finfo.GetCustomAttributes(false).Any(a => a is TransientAttribute);
@@ -78,26 +79,26 @@ namespace Antmicro.Migrant
 			var fd = obj as FieldDescriptor;
 			if (fd != null)
 			{
-				return fd.Name == Name && fd.TypeAQN == TypeAQN && fd.IsTransient == IsTransient;
+				return fd.Name == Name && fd.TypeAQN == TypeAQN && fd.IsTransient == IsTransient && fd.OwningTypeAQN == OwningTypeAQN;
 			}
 			return base.Equals(obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return string.Format("{0}/{1}/{2}", Name, TypeAQN, IsTransient).GetHashCode();
+			return string.Format("{0}/{1}/{2}/{3}", Name, TypeAQN, IsTransient, OwningTypeAQN).GetHashCode();
 		}
 
 		public override string ToString()
 		{
-			return string.Format("[FieldDescriptor: IsTransient={0}, Name={1}, TypeAQN={2}]", IsTransient, Name, TypeAQN);
+			return string.Format("[FieldDescriptor: IsTransient={0}, Name={1}, TypeAQN={2}, OwningTypeAQN={3}]", IsTransient, Name, TypeAQN, OwningTypeAQN);
 		}
 
 		public bool IsTransient { get; private set; }
 		public string Name { get; private set; }
 		public FieldInfo Info { get; private set; }
 		public string TypeAQN { get; private set; }
-		public string OwningTypeAQN { get; private set; }
+		public string OwningTypeAQN { get; set; }
 
 		public enum CompareResult
 		{
@@ -105,6 +106,23 @@ namespace Antmicro.Migrant
 			NotMatch,
 			FieldRenamed,
 			FieldTypeChanged
+		}
+
+		public class MoveFieldComparer : IEqualityComparer<FieldDescriptor>
+		{
+			#region IEqualityComparer implementation
+
+			public bool Equals(FieldDescriptor x, FieldDescriptor y)
+			{
+				return x.Name == y.Name && x.TypeAQN == y.TypeAQN;
+			}
+
+			public int GetHashCode(FieldDescriptor obj)
+			{
+				return string.Format("{0}/{1}", obj.Name, obj.TypeAQN).GetHashCode();
+			}
+
+			#endregion
 		}
 	}
 }
