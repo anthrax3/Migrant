@@ -85,7 +85,14 @@ namespace Antmicro.Migrant
 
 		public override int GetHashCode()
 		{
-			return string.Format("{0}/{1}/{2}/{3}", Name, TypeAQN, IsTransient, OwningTypeAQN).GetHashCode();
+			var hash = 17;
+
+			hash = hash * 23 + (Name != null ? Name.GetHashCode() : 0);
+			hash = hash * 23 + (TypeAQN != null ? TypeAQN.GetHashCode() : 0);
+			hash = hash * 23 + IsTransient.GetHashCode();
+			hash = hash * 23 + (OwningTypeAQN != null ? OwningTypeAQN.GetHashCode() : 0);
+
+			return hash;
 		}
 
 		public override string ToString()
@@ -117,7 +124,12 @@ namespace Antmicro.Migrant
 
 			public int GetHashCode(FieldDescriptor obj)
 			{
-				return string.Format("{0}/{1}", obj.Name, obj.TypeAQN).GetHashCode();
+				var hash = 17;
+
+				hash = hash * 23 + (obj.Name != null ? obj.Name.GetHashCode() : 0);
+				hash = hash * 23 + (obj.TypeAQN != null ? obj.TypeAQN.GetHashCode() : 0);
+
+				return hash;
 			}
 
 			#endregion
