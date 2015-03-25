@@ -68,7 +68,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldRemoval));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldRemoval));
 
             Assert.AreEqual("testing", testsOnDomain2.GetValueOnAppDomain("a"));
             Assert.AreEqual("finish", testsOnDomain2.GetValueOnAppDomain("c"));
@@ -87,7 +87,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldAddition));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldAddition));
 
             Assert.AreEqual("testing", testsOnDomain2.GetValueOnAppDomain("a"));
             Assert.AreEqual(0, testsOnDomain2.GetValueOnAppDomain("b"));
@@ -107,7 +107,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldMove));
 
             Assert.AreEqual("testing", testsOnDomain2.GetValueOnAppDomain("a"));
             Assert.AreEqual("finish", testsOnDomain2.GetValueOnAppDomain("b"));
@@ -126,7 +126,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldMove));
 
             Assert.AreEqual("testing", testsOnDomain2.GetValueOnAppDomain("a"));
             Assert.AreEqual("finish", testsOnDomain2.GetValueOnAppDomain("b"));
@@ -145,7 +145,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldMove));
 
             Assert.AreEqual(300, testsOnDomain2.GetValueOnAppDomain("A", "f"));
             Assert.AreEqual(200, testsOnDomain2.GetValueOnAppDomain("B", "f"));
@@ -164,7 +164,7 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
 
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.FieldMove));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowFieldMove));
 
             Assert.AreEqual(100, testsOnDomain2.GetValueOnAppDomain("C", "f"));
             Assert.AreEqual(200, testsOnDomain2.GetValueOnAppDomain("B", "f"));
@@ -197,7 +197,7 @@ namespace Antmicro.Migrant.Tests
 
             var bytes = testsOnDomain1.SerializeOnAppDomain();
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.InheritanceChainChange));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowInheritanceChainChange));
 
             Assert.IsNotNull(testsOnDomain2.GetValueOnAppDomain("f"));
         }
@@ -213,7 +213,7 @@ namespace Antmicro.Migrant.Tests
 
             var bytes = testsOnDomain1.SerializeOnAppDomain();
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.InheritanceChainChange));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowInheritanceChainChange));
 
             Assert.IsNotNull(testsOnDomain2.GetValueOnAppDomain("f"));
         }
@@ -229,7 +229,7 @@ namespace Antmicro.Migrant.Tests
 
             var bytes = testsOnDomain1.SerializeOnAppDomain();
             testsOnDomain2.CreateInstanceOnAppDomain(type2);
-            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.TypeNameChanged));
+            testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(Antmicro.Migrant.Customization.VersionToleranceLevel.AllowTypeNameChange));
 
             Assert.IsNotNull(testsOnDomain2.GetValueOnAppDomain("f"));
         }

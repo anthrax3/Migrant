@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Ant Micro <www.antmicro.com>
+  Copyright (c) 2015 Antmicro <www.antmicro.com>
 
   Authors:
    * Konrad Kruczynski (kkruczynski@antmicro.com)
@@ -29,54 +29,48 @@ using System;
 namespace Antmicro.Migrant.Customization
 {
     /// <summary>
-    /// Level of the version tolerance, that is how much layout of the deserialized type can differ
-    /// from the (original) layout of the serialized type.
+    /// Level of the version tolerance, that is how the deserialized type can differ
+    /// from the serialized (original) type.
     /// </summary>
     [Flags]
     public enum VersionToleranceLevel
     {
         /// <summary>
-        /// Both new and old layout have to have the same base classes, number of fields, with the same names and types.
+        /// Modules GUIDs can vary between new and old streams.
         /// </summary>
-        ExactLayout = 0,
+        AllowGuidChange = 0x1,
 
         /// <summary>
-        /// Both serialized and serialized classes must have identical module ID (which is GUID). In other words
-        /// that means these assemblies are from one and the same compilation.
+        /// The new layout can have more fields that the old one. New fields are initialized to their default values.
         /// </summary>
-        Guid = 0x1,
+        AllowFieldAddition = 0x2,
 
         /// <summary>
-        /// The new layout can have more fields that the old one. They are initialized to their default values.
+        /// The new layout can have less fields that the old one. Values of the missing ones are ignored.
         /// </summary>
-        FieldAddition = 0x2,
-
-        /// <summary>
-        /// The new layout can have less fields that the old one. Values of the missing one are ignored.
-        /// </summary>
-        FieldRemoval = 0x4,
+        AllowFieldRemoval = 0x4,
 
         /// <summary>
         /// In the new layout fields can be moved to another classes in the inheritance hierarchy. 
         /// Fields will be matched by names, therefore this flag cannot be used in classes with multiple fields with the same name.
         /// </summary>
-        FieldMove = 0x8,
+        AllowFieldMove = 0x8,
 
         /// <summary>
-        /// Classes inheritance hirarchy can vary between new and old layout, e.g., base class can be removed.
+        /// Classes inheritance hierarchy can vary between new and old streams, e.g., base class can be removed.
         /// </summary>
-        InheritanceChainChange = 0x10,
+        AllowInheritanceChainChange = 0x10,
 
         /// <summary>
-        /// Classes names can vary between new and old layout.
+        /// Classes names can vary between new and old streams.
         /// Fields will be matched by names, therefore this flag cannot be used in classes with multiple fields with the same name.
         /// </summary>
-        TypeNameChanged = 0x20,
+        AllowTypeNameChange = 0x20,
 
         /// <summary>
-        /// Assemblies version can very between new and old layout.
+        /// Assemblies versions can vary between new and old streams.
         /// </summary>
-        AssemblyVersionChanged = 0x40
+        AllowAssemblyVersionChange = 0x40
     }
 }
 

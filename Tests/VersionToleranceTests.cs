@@ -64,49 +64,53 @@ namespace Antmicro.Migrant.Tests
 
         [Test]
         public void TestBaseClassInsertion(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(
                                         DynamicClass.Create("A"),
                                         DynamicClass.Create("A", DynamicClass.Create("BaseA")),
                                         vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.InheritanceChainChange) ? deserializationOK : !deserializationOK);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowInheritanceChainChange) ? deserializationOK : !deserializationOK);
         }
 
         [Test]
         public void TestBaseClassRemoval(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(
                                         DynamicClass.Create("A", DynamicClass.Create("BaseA")),
                                         DynamicClass.Create("A"),
                                         vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.InheritanceChainChange) ? deserializationOK : !deserializationOK);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowInheritanceChainChange) ? deserializationOK : !deserializationOK);
         }
 
         [Test]
         public void TestBaseClassNameChanged(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowAssemblyVersionChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(
                                         DynamicClass.Create("A", DynamicClass.Create("BaseA")),
@@ -114,77 +118,81 @@ namespace Antmicro.Migrant.Tests
                                         vtl);
 
             Assert.IsTrue(
-                vtl.HasFlag(VersionToleranceLevel.TypeNameChanged)
+                vtl.HasFlag(VersionToleranceLevel.AllowTypeNameChange)
                 ? deserializationOK : !deserializationOK);
         }
 
         [Test]
-        public void TestFieldMovedBetweenClasses(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+        public void TestAllowFieldMovedBetweenClasses(
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(
                                         DynamicClass.Create("A", DynamicClass.Create("BaseA").WithField("a", typeof(string))).WithField("b", typeof(int)),
                                         DynamicClass.Create("A", DynamicClass.Create("BaseA")).WithField("a", typeof(string)).WithField("b", typeof(int)),
                                         vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.FieldMove) ? deserializationOK : !deserializationOK);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowFieldMove) ? deserializationOK : !deserializationOK);
         }
 
         [Test]
-        public void TestSimpleFieldAddition(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+        public void TestSimpleAllowFieldAddition(
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var type1 = DynamicClass.Create("A").WithField<int>("a");
             var type2 = DynamicClass.Create("A").WithField<int>("a").WithField<float>("b");
 
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(type1, type2, vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.FieldAddition) ? deserializationOK : !deserializationOK);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowFieldAddition) ? deserializationOK : !deserializationOK);
         }
 
         [Test]
-        public void TestSimpleFieldRemoval(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+        public void TestSimpleAllowFieldRemoval(
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var type1 = DynamicClass.Create("A").WithField<int>("a").WithField<float>("b");
             var type2 = DynamicClass.Create("A").WithField<int>("a");
             var deserializationOK = SerializeAndDeserializeOnTwoAppDomains(type1, type2, vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.FieldRemoval) ? deserializationOK : !deserializationOK);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowFieldRemoval) ? deserializationOK : !deserializationOK);
         }
 
         [Test]
-        public void TestGuidVerification(
-            [Values(VersionToleranceLevel.InheritanceChainChange,
-                VersionToleranceLevel.ExactLayout,
-                VersionToleranceLevel.FieldAddition,
-                VersionToleranceLevel.FieldMove,
-                VersionToleranceLevel.FieldRemoval,
-                VersionToleranceLevel.Guid,
-                VersionToleranceLevel.TypeNameChanged)] VersionToleranceLevel vtl)
+        public void TestAllowGuidChangeVerification(
+            [Values(
+                0,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowTypeNameChange)] VersionToleranceLevel vtl)
         {
             var type = DynamicClass.Create("A").WithField<int>("Field");
             var result = SerializeAndDeserializeOnTwoAppDomains(type, type, vtl);
 
-            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.Guid) ? !result : result);
+            Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowGuidChange) ? !result : result);
         }
     }
 }

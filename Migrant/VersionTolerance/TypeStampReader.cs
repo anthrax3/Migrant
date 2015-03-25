@@ -61,7 +61,7 @@ namespace Antmicro.Migrant.VersionTolerance
                 stampCache.Add(type, StampHelpers.GetFieldsInSerializationOrder(type, true).Select(x => new FieldInfoOrEntryToOmit(x)).ToList());
                 return;
             }
-            if(versionToleranceLevel == VersionToleranceLevel.Guid)
+            if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowGuidChange))
             {
                 throw new InvalidOperationException(string.Format("The class was serialized with different module version id {0}, current one is {1}.",
                     streamTypeStamp.ModuleGUID, type.Module.ModuleVersionId));
@@ -69,7 +69,7 @@ namespace Antmicro.Migrant.VersionTolerance
 
             var result = new List<FieldInfoOrEntryToOmit>();
             var assemblyTypeStamp = new TypeStamp(type, true);
-            if(assemblyTypeStamp.Classes.Count != streamTypeStamp.Classes.Count && !versionToleranceLevel.HasFlag(VersionToleranceLevel.InheritanceChainChange))
+            if(assemblyTypeStamp.Classes.Count != streamTypeStamp.Classes.Count && !versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowInheritanceChainChange))
             {
                 throw new InvalidOperationException(string.Format("Class hierarchy changed. Expected {1} classes in a chain, but found {0}.", assemblyTypeStamp.Classes.Count, streamTypeStamp.Classes.Count));
             }
@@ -78,7 +78,7 @@ namespace Antmicro.Migrant.VersionTolerance
 
             if(cmpResult.ClassesRenamed.Any())
             {
-                if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.AssemblyVersionChanged))
+                if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowAssemblyVersionChange))
                 {
                     foreach(var renamed in cmpResult.ClassesRenamed)
                     {
@@ -91,7 +91,7 @@ namespace Antmicro.Migrant.VersionTolerance
                     }
                 }
 
-                if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.TypeNameChanged))
+                if(!versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowTypeNameChange))
                 {
                     foreach(var renamed in cmpResult.ClassesRenamed)
                     {
@@ -103,15 +103,15 @@ namespace Antmicro.Migrant.VersionTolerance
                 }
             }
 
-            if(cmpResult.FieldsAdded.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldAddition))
+            if(cmpResult.FieldsAdded.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowFieldAddition))
             {
                 throw new InvalidOperationException(string.Format("Field added: {0}.", cmpResult.FieldsAdded[0].Name));
             }
-            if(cmpResult.FieldsRemoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldRemoval))
+            if(cmpResult.FieldsRemoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowFieldRemoval))
             {
                 throw new InvalidOperationException(string.Format("Field removed: {0}.", cmpResult.FieldsRemoved[0].Name));
             }
-            if(cmpResult.FieldsMoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.FieldMove))
+            if(cmpResult.FieldsMoved.Any() && !versionToleranceLevel.HasFlag(VersionToleranceLevel.AllowFieldMove))
             {
                 throw new InvalidOperationException(string.Format("Field moved: {0}.", cmpResult.FieldsMoved.ElementAt(0).Key.Name));
             }
