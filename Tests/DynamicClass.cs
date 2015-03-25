@@ -131,7 +131,6 @@ namespace Antmicro.Migrant.Tests
         private Version version;
 
         private static readonly AssemblyName AssemblyName = new AssemblyName("TestAssembly");
-        private const int counter = 0;
         public static string prefix;
 
         [Serializable]
