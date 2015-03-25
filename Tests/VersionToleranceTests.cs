@@ -194,6 +194,48 @@ namespace Antmicro.Migrant.Tests
 
             Assert.IsTrue(vtl.HasFlag(VersionToleranceLevel.AllowGuidChange) ? !result : result);
         }
+
+        [Test]
+        public void ShouldHandleAssemblyVersionChange(
+            [Values(
+                0,
+                VersionToleranceLevel.AllowAssemblyVersionChange,
+                VersionToleranceLevel.AllowFieldAddition,
+                VersionToleranceLevel.AllowFieldMove,
+                VersionToleranceLevel.AllowFieldRemoval,
+                VersionToleranceLevel.AllowGuidChange,
+                VersionToleranceLevel.AllowInheritanceChainChange,
+                VersionToleranceLevel.AllowTypeNameChange
+            )]
+            VersionToleranceLevel level)
+        {
+            var type1 = DynamicClass.Create("A", version: new Version(0, 0)).WithField<int>("i");
+            var type2 = DynamicClass.Create("A", version: new Version(0, 1)).WithField<int>("i");
+
+            testsOnDomain1.CreateInstanceOnAppDomain(type1);
+            testsOnDomain1.SetValueOnAppDomain("i", 147);
+
+            var bytes = testsOnDomain1.SerializeOnAppDomain();
+            testsOnDomain2.CreateInstanceOnAppDomain(type2);
+
+            if(level.HasFlag(VersionToleranceLevel.AllowAssemblyVersionChange))
+            {
+                // we do NOT expect exception here
+                testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(level));
+                Assert.AreEqual(147, testsOnDomain2.GetValueOnAppDomain("i"));
+            }
+            else
+            {
+                try{
+                    // we expect exception here
+                    testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(level));
+                    Assert.Fail("Should not deserialize in tolerance level {0}, but it did!", level);
+                } catch(InvalidOperationException)
+                {
+                    // it's fine
+                }
+            }
+        }
     }
 }
 
