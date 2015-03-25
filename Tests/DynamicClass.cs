@@ -33,11 +33,12 @@ namespace Antmicro.Migrant.Tests
     [Serializable]
     public class DynamicClass
     {
-        public static DynamicClass Create(string name, DynamicClass baseClass = null)
+        public static DynamicClass Create(string name, DynamicClass baseClass = null, Version version = null)
         {
             var result = new DynamicClass();
             result.name = name;
             result.baseClass = baseClass;
+            result.version = version ?? new Version();
             return result;
         }
 
@@ -103,9 +104,13 @@ namespace Antmicro.Migrant.Tests
 
         public object Instantiate()
         {
-            var dllName = string.Format("{0}-{1}-{2}.dll", AssemblyName.Name, "xxx", counter);
+            var dllName = string.Format("{0}-{1}.dll", AssemblyName.Name, "xxx");
 
-            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(string.Format("{0}-{1}-{2}", AssemblyName.Name, "xxx", counter/*++*/)), /*persistent ?*/AssemblyBuilderAccess.RunAndSave /*: AssemblyBuilderAccess.Run*/);
+            var assemblyName = new AssemblyName {
+                Name = string.Format("{0}-{1}", AssemblyName.Name, "xxx"),
+                Version = version
+            };
+            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             var builtType = CreateType(assemblyBuilder, dllName);
             assemblyBuilder.Save(dllName);
             if(!string.IsNullOrWhiteSpace(prefix))
@@ -123,6 +128,7 @@ namespace Antmicro.Migrant.Tests
         private string name;
         private Dictionary<string, FieldDescriptor> fields = new Dictionary<string, FieldDescriptor>();
         private DynamicClass baseClass;
+        private Version version;
 
         private static readonly AssemblyName AssemblyName = new AssemblyName("TestAssembly");
         private const int counter = 0;
