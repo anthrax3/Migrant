@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2014 Antmicro <www.antmicro.com>
+  Copyright (c) 2014-2015 Antmicro <www.antmicro.com>
 
   Authors:
    * Konrad Kruczynski (kkruczynski@antmicro.com)
@@ -33,6 +33,11 @@ namespace Antmicro.Migrant.VersionTolerance
 {
     internal static class StampHelpers
     {
+        public static bool IsStampNeeded(TypeDescriptor type, bool treatCollectionAsUserObject)
+        {
+            return !Helpers.IsWriteableByPrimitiveWriter(type) && (!CollectionMetaToken.IsCollection(type) || treatCollectionAsUserObject);
+        }
+
         public static bool IsStampNeeded(Type type, bool treatCollectionAsUserObject)
         {
             return !Helpers.IsWriteableByPrimitiveWriter(type) && (!CollectionMetaToken.IsCollection(type) || treatCollectionAsUserObject);
@@ -45,7 +50,7 @@ namespace Antmicro.Migrant.VersionTolerance
 
         public static IEnumerable<Tuple<Type, IEnumerable<FieldInfo>>> GetFieldsStructureInSerializationOrder(Type type, bool withTransient = false)
         {
-            return type.GetAllFieldsStructurized().Select(x => Tuple.Create(x.Item1, x.Item2.Where(y => withTransient || Helpers.IsNotTransient(y)).OrderBy(y => y.Name).AsEnumerable()));
+            return type.GetAllFieldsStructurized().Select(x => Tuple.Create(x.Item1, x.Item2.Where(y => withTransient || !Helpers.IsTransient(y)).OrderBy(y => y.Name).AsEnumerable()));
         }
     }
 }

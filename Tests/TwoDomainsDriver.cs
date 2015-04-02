@@ -35,6 +35,9 @@ namespace Antmicro.Migrant.Tests
         {
             this.useGeneratedDeserializer = useGeneratedDeserializer;
             this.useGeneratedSerializer = useGeneratedSerializer;
+
+            testsOnDomain1 = this;
+            testsOnDomain2 = this;
         }
 
         public TwoDomainsDriver()
@@ -158,7 +161,7 @@ namespace Antmicro.Migrant.Tests
             obj = deserializer.Deserialize<object>(stream);
         }
 
-        public bool SerializeAndDeserializeOnTwoAppDomains(DynamicType domainOneType, DynamicType domainTwoType, VersionToleranceLevel vtl)
+        public bool SerializeAndDeserializeOnTwoAppDomains(DynamicType domainOneType, DynamicType domainTwoType, VersionToleranceLevel vtl, bool allowGuidChange = true)
         {
             testsOnDomain1.CreateInstanceOnAppDomain(domainOneType);
             testsOnDomain2.CreateInstanceOnAppDomain(domainTwoType);
@@ -166,11 +169,12 @@ namespace Antmicro.Migrant.Tests
             var bytes = testsOnDomain1.SerializeOnAppDomain();
             try 
             {
-                testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(vtl));
+                testsOnDomain2.DeserializeOnAppDomain(bytes, GetSettings(allowGuidChange ? vtl | VersionToleranceLevel.AllowGuidChange : vtl));
                 return true;
             } 
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
+                System.IO.File.AppendAllText("/tmp/log", string.Format("wtf?! {0} \n", e.Message));
                 return false;
             }
         }
@@ -180,6 +184,11 @@ namespace Antmicro.Migrant.Tests
             return new Settings(useGeneratedSerializer ? Method.Generated : Method.Reflection,                  
                                 useGeneratedDeserializer ? Method.Generated : Method.Reflection,                    
                                 level);
+        }
+
+        protected Settings GetSettingsAllowingGuidChange(VersionToleranceLevel level = 0)
+        {
+            return GetSettings(level | VersionToleranceLevel.AllowGuidChange);
         }
 
         protected TwoDomainsDriver testsOnDomain1;
